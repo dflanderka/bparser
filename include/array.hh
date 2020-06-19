@@ -8,6 +8,8 @@
 #ifndef INCLUDE_ARRAY_HH_
 #define INCLUDE_ARRAY_HH_
 
+#define BOOST_MATH_DISABLE_FLOAT128
+
 #include <memory>
 #include <vector>
 #include <algorithm>

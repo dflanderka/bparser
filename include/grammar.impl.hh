@@ -8,6 +8,8 @@
 #ifndef INCLUDE_GRAMMAR_IMPL_HH_
 #define INCLUDE_GRAMMAR_IMPL_HH_
 
+#define BOOST_MATH_DISABLE_FLOAT128
+
 #include <iostream>
 #include <cmath>
 #include <iostream>
