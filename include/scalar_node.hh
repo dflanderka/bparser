@@ -58,6 +58,7 @@ struct ScalarNode {
 	static ScalarNode * create_const(double a);
 	static ScalarNode * create_value(double *a);
 	static ScalarNode * create_result(ScalarNode *result, double *a);
+	static ScalarNode * create_ifelse(ScalarNode *a, ScalarNode *b, ScalarNode *c);
 
 	/**
 	 * Generic factory functions for operation nodes.
@@ -147,11 +148,11 @@ union DoubleMask {
 	int64_t	mask;
 	double  value;
 };
-inline double mask_to_double(int64_t x) {
+inline constexpr double mask_to_double(int64_t x) {
 	return reinterpret_cast<double &>(x);
 }
 
-inline int64_t double_to_mask(double x) {
+inline constexpr int64_t double_to_mask(double x) {
 	return reinterpret_cast<int64_t &>(x);
 }
 
@@ -291,6 +292,7 @@ struct _and_ : public ScalarNode {
 	}
 };
 
+
 UNARY_FN(_abs_, 	20, abs);
 UNARY_FN(_sqrt_, 	21, sqrt);
 UNARY_FN(_exp_, 	22, exp);
@@ -386,6 +388,15 @@ struct _copy_ : public ScalarNode {
 };
 
 
+struct _ifelse_ : public ScalarNode {
+	static const char op_code = 51;
+	static const char n_eval_args = 4;
+	inline static void eval(double &res, double a, double b, double c) {
+		// TODO: vectorize
+		res = double_to_mask(b) ? a : c;	// we use bit masks for bool values
+	}
+};
+
 
 
 /***********************
@@ -427,6 +438,7 @@ ScalarNode * ScalarNode::create(ScalarNode *a) {
 	node_ptr->set_name(typeid(T).name());
 	node_ptr->add_input(a);
 	if (T::n_eval_args == 1) {
+		// Note: in place operations are not supported
 		node_ptr->result_storage = none;
 	} else {
 		BP_ASSERT(T::n_eval_args == 2);
@@ -445,6 +457,7 @@ ScalarNode * ScalarNode::create(ScalarNode *a, ScalarNode *b) {
 	node_ptr->add_input(a);
 	node_ptr->add_input(b);
 	if (T::n_eval_args == 2) {
+		// Note: in place operations are not supported
 		node_ptr->result_storage = none;
 	} else {
 		BP_ASSERT(T::n_eval_args == 3);
@@ -455,6 +468,19 @@ ScalarNode * ScalarNode::create(ScalarNode *a, ScalarNode *b) {
 	return node_ptr;
 }
 
+inline ScalarNode * ScalarNode::create_ifelse(ScalarNode *a, ScalarNode *b, ScalarNode *c)  {
+	auto * node_ptr = new _ifelse_;
+	node_ptr->op_code_ = _ifelse_::op_code;
+	node_ptr->set_name(typeid(_ifelse_).name());
+	node_ptr->add_input(a);
+	node_ptr->add_input(b);
+	node_ptr->add_input(c);
+	BP_ASSERT(_ifelse_::n_eval_args == 4);
+	node_ptr->result_storage = temporary;
+
+//		nodes.push_back(node_ptr);
+	return node_ptr;
+}
 
 
 
