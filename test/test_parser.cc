@@ -140,16 +140,22 @@ void test_expression() {
 	//BP_ASSERT(test_expr("cv4[2] ** av2", {25, 25, 25}));
 	//BP_ASSERT(test_expr("cv4[2] ** av2", {25, 25, 25}));
 
-	auto vec_false = std::vector<double>(1, bparser::details::double_false);
-	auto vec_true = std::vector<double>(1, bparser::details::double_true);
+	auto vec_false = std::vector<double>(1, bparser::details::double_false());
+	auto vec_true = std::vector<double>(1, bparser::details::double_true());
 	BP_ASSERT(test_expr("cs3 > 4.5", vec_false));
 	BP_ASSERT(test_expr("cs3 < 4.5", vec_true));
 
 	BP_ASSERT(test_expr("3 if cs3 < 4.5 else 4", {3}));
 	BP_ASSERT(test_expr("3 if cs3 > 4.5 else 4", {4}));
 
-	//BP_ASSERT(test_expr("cv4 > 4.5", {0, 1, 1}));
+
+	BP_ASSERT(test_expr("[3, 4] @ [[1], [2]]", {11}));
+	BP_ASSERT(test_expr("[3, 4, 1] @ [[1], [2], [3]]", {14}));
+	BP_ASSERT(test_expr("[[1, 2], [2, 3], [3, 4]] @ [[1], [2]]", {5, 8, 11}));
 	//BP_ASSERT(test_expr("0 if cv4 > 4.5 else 1", {1, 0, 0}));
+
+	BP_ASSERT(test_expr("minimum([1,2,3], [0,4,3])", {0,2,3}));
+	BP_ASSERT(test_expr("maximum([1,2,3], [0,4,3])", {1,4,3}));
 }
 
 

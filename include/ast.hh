@@ -97,10 +97,10 @@ struct assign_op {
 /// TODO: eliminate call type, by allowing item to be a function
 /// This way we can further simplify visitors.
 
-inline void assert_list(operand x) {
-	//std::cout << x.which() << "\n";
-	BP_ASSERT(boost::get<list>(&x) != nullptr);
-}
+//inline void assert_list(operand x) {
+//	//std::cout << x.which() << "\n";
+//	BP_ASSERT(boost::get<list>(&x) != nullptr);
+//}
 
 
 /**
@@ -274,20 +274,19 @@ struct make_array {
 //    	result_type aitem = boost::apply_visitor(*this, x.item);
 //    	alist = boost::apply_visitor(append_visitor(alist), aitem);
 //    	return alist;
+    	return 0;
     }
 
 
     result_type operator()(assign_op x) const  {
-    	//std::string& var_name = boos);
     	result_type rhs = boost::apply_visitor(*this, x.rhs);
-    	// extract single
-
-    	if (Array * rhs_array = boost::get<Array>(&rhs)) {
+    	if (Array* rhs_array = boost::get<Array>(&rhs)) {
     		symbols[x.lhs] = *rhs_array;
     		return rhs;
-    	} else {
-    		BP_ASSERT(false);
     	}
+    	Throw() << "Internal error.\n"
+    		<< "Wrong type: " << "operand:" << rhs.which() << "\n"
+			<< "Expected: Array\n";
     }
 
 };
@@ -344,11 +343,10 @@ struct get_variables {
     }
 
     result_type operator()(list x) const {
-
     	std::cout << "List at wrong place: \n";
     	std::cout << print(x) << "\n";
     	BP_ASSERT(false);
-
+    	return {};
     }
 
     result_type operator()(assign_op const &x) const  {
